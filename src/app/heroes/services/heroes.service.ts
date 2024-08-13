@@ -24,11 +24,12 @@ export class HeroesService {
     );
   }
 
-  getSuggestions2( query: string ): Observable<Hero[]> {
-    return this.http.get<Hero[]>(`${ this.baseUrl }/heroes?_start=${ query }&_limit=6`);
+  getSuggestions( query: string ): Observable<Hero[]> {
+    return this.http.get<Hero[]>(`${ this.baseUrl }/heroes?_start=${ query }&_limit=10`);
   }
 
-  getSuggestions( query: string ): Observable<Hero[]> {
-    return this.http.get<Hero[]>(`${ this.baseUrl }/heroes?q=${ query }&_limit=6`);
-  }
+  //obsoleto
+  // getSuggestions2( query: string ): Observable<Hero[]> {
+  //   return this.http.get<Hero[]>(`${ this.baseUrl }/heroes?q=${ query }&_limit=6`);
+  // }
 }

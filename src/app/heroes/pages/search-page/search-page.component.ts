@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Hero } from '../../interfaces/hero.interface';
 import { HeroesService } from '../../services/heroes.service';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { map, Observable, startWith, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-search-page',
@@ -13,28 +14,29 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 export class SearchPageComponent {
 
   public searchInput = new FormControl('');
-  public heroes: Hero[] = [];
+  public filteredHeroes: Observable<Hero[]> = new Observable();
   public selectedHero?: Hero;
 
-  constructor( private heroesService: HeroesService ){}
+  constructor(private heroesService: HeroesService) {}
 
-  searchHero() {
-    const value: string = this.searchInput.value || '';
-
-    this.heroesService.getSuggestions( value )
-      .subscribe( heroes => this.heroes = heroes );
+  ngOnInit() {
+    this.filteredHeroes = this.searchInput.valueChanges.pipe(
+      startWith(''),
+      switchMap(value => this.heroesService.getSuggestions(value || '')),
+      map(heroes => heroes.filter(hero => hero.superhero.toLowerCase().includes((this.searchInput.value || '').toLowerCase())))
+    );
   }
 
-
-  onSelectedOption( event: MatAutocompleteSelectedEvent ): void {
-    if ( !event.option.value ) {
-      this.selectedHero = undefined;
-      return;
+  onSelectedOption(event: MatAutocompleteSelectedEvent): void {
+    this.selectedHero = event.option.value;
+    
+    if (this.selectedHero) {
+      this.searchInput.setValue(this.selectedHero.superhero);
     }
+  }
 
-    const hero: Hero = event.option.value;
-    this.searchInput.setValue( hero.superhero );
-
-    this.selectedHero = hero;
+  onDeselectHero() {
+    this.selectedHero = undefined;
+    this.searchInput.setValue('');
   }
 }
